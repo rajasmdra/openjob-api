@@ -1,0 +1,14 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable indent */
+const response = (res, statusCode, message, data) => {
+    return res
+        .status(statusCode)
+        .json({
+            code: statusCode,
+            status: statusCode < 400 ? 'success' : 'failed',
+            message,
+            data,
+        });
+};
+
+export default response;
