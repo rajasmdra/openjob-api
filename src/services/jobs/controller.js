@@ -1,10 +1,10 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable indent */
-import JobRepositories from './JobRepositories.js';
-import CompanyRepositories from '../companies/CompanyRepositories.js';
+import JobRepositories from './repositories.js';
+import CompanyRepositories from '../companies/repositories.js';
 import response from '../../utils/response.js';
-import AuthorizationError from '../../exceptions/AuthorizationError.js';
-import NotFoundError from '../../exceptions/NotFoundError.js';
+import AuthorizationError from '../../exceptions/authorization-error.js';
+import NotFoundError from '../../exceptions/not-found-error.js';
 
 export const createJob = async (req, res, next) => {
     const { title, description, companyId, categoryId } = req.validated;
