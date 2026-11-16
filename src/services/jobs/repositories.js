@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable indent */
+/* eslint-disable camelcase */
 import { nanoid } from 'nanoid';
 import { Pool } from 'pg';
 
@@ -8,46 +9,99 @@ class JobRepositories {
         this.pool = new Pool();
     }
 
-    async createJob({ title, description, companyId, categoryId }) {
+    async createJob({
+        company_id,
+        category_id,
+        title,
+        description,
+        job_type,
+        experience_level,
+        location_type,
+        location_city = null,
+        salary_min = null,
+        salary_max = null,
+        is_salary_visible = true,
+        status = 'open',
+    }) {
         const id = nanoid(16);
         const createdAt = new Date().toISOString();
         const updatedAt = createdAt;
 
         const query = {
-            text: 'INSERT INTO jobs(id, title, description, company_id, category_id, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id, title, description, company_id, category_id, created_at, updated_at',
-            values: [id, title, description, companyId, categoryId, createdAt, updatedAt],
+            text: `INSERT INTO jobs(
+                id, company_id, category_id, title, description, 
+                job_type, experience_level, location_type, location_city, 
+                salary_min, salary_max, is_salary_visible, status, 
+                created_at, updated_at
+            ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) 
+            RETURNING id, company_id, category_id, title, description, job_type, experience_level, location_type, location_city, salary_min, salary_max, is_salary_visible, status, created_at, updated_at`,
+            values: [
+                id, company_id, category_id, title, description,
+                job_type, experience_level, location_type, location_city,
+                salary_min, salary_max, is_salary_visible, status,
+                createdAt, updatedAt,
+            ],
         };
 
         const result = await this.pool.query(query);
-
         return result.rows[0];
     }
 
-    async getAllJobs({ title, companyId, categoryId } = {}) {
+    async getAllJobs({ title, companyName, companyId, categoryId } = {}) {
         const conditions = [];
         const values = [];
 
         if (title) {
             values.push(`%${title}%`);
-            conditions.push(`title ILIKE $${values.length}`);
+            conditions.push(`jobs.title ILIKE $${values.length}`);
+        }
+
+        if (companyName) {
+            values.push(`%${companyName}%`);
+            conditions.push(`companies.name ILIKE $${values.length}`);
         }
 
         if (companyId) {
             values.push(companyId);
-            conditions.push(`company_id = $${values.length}`);
+            conditions.push(`jobs.company_id = $${values.length}`);
         }
 
         if (categoryId) {
             values.push(categoryId);
-            conditions.push(`category_id = $${values.length}`);
+            conditions.push(`jobs.category_id = $${values.length}`);
         }
 
-        let text = 'SELECT * FROM jobs';
+        let text = `
+            SELECT jobs.*, companies.name AS company_name 
+            FROM jobs 
+            INNER JOIN companies ON jobs.company_id = companies.id
+        `;
+
         if (conditions.length > 0) {
             text += ` WHERE ${conditions.join(' AND ')}`;
         }
 
         const result = await this.pool.query({ text, values });
+        return result.rows;
+    }
+
+    async getJobsByCompanyId(companyId) {
+        const query = {
+            text: 'SELECT * FROM jobs WHERE company_id = $1',
+            values: [companyId],
+        };
+
+        const result = await this.pool.query(query);
+        return result.rows;
+    }
+
+    async getJobsByCategoryId(categoryId) {
+        const query = {
+            text: 'SELECT * FROM jobs WHERE category_id = $1',
+            values: [categoryId],
+        };
+
+        const result = await this.pool.query(query);
         return result.rows;
     }
 
@@ -61,12 +115,45 @@ class JobRepositories {
         return result.rows[0];
     }
 
-    async editJobById({ id, title, description, categoryId }) {
+    async editJobById({
+        id,
+        company_id,
+        category_id,
+        title,
+        description,
+        job_type,
+        experience_level,
+        location_type,
+        location_city = null,
+        salary_min = null,
+        salary_max = null,
+        is_salary_visible = true,
+        status,
+    }) {
         const updatedAt = new Date().toISOString();
 
         const query = {
-            text: 'UPDATE jobs SET title = $1, description = $2, category_id = $3, updated_at = $4 WHERE id = $5 RETURNING id',
-            values: [title, description, categoryId, updatedAt, id],
+            text: `UPDATE jobs SET 
+                company_id = COALESCE($1, company_id),
+                category_id = $2, 
+                title = $3, 
+                description = $4, 
+                job_type = $5, 
+                experience_level = $6, 
+                location_type = $7, 
+                location_city = $8, 
+                salary_min = $9, 
+                salary_max = $10, 
+                is_salary_visible = $11, 
+                status = $12, 
+                updated_at = $13 
+            WHERE id = $14 RETURNING id`,
+            values: [
+                company_id || null, category_id, title, description,
+                job_type, experience_level, location_type, location_city,
+                salary_min, salary_max, is_salary_visible, status,
+                updatedAt, id,
+            ],
         };
 
         const result = await this.pool.query(query);
