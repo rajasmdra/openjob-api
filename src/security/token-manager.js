@@ -6,7 +6,7 @@ import InvariantError from '../exceptions/invariant-error.js';
 import AuthenticationError from '../exceptions/authentication-error.js';
 
 const TokenManager = {
-    generateAccessToken: (payload) => jwt.sign(payload, process.env.ACCESS_TOKEN_KEY),
+    generateAccessToken: (payload) => jwt.sign(payload, process.env.ACCESS_TOKEN_KEY, { expiresIn: '3h' }),
     generateRefreshToken: (payload) => jwt.sign(payload, process.env.REFRESH_TOKEN_KEY),
     verifyRefreshToken: (refreshToken) => {
         try {
