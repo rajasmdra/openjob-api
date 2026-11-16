@@ -17,14 +17,18 @@ exports.up = (pgm) => {
             primaryKey: true,
         },
         name: {
-            type: 'VARCHAR(50)',
+            type: 'VARCHAR(100)',
             notNull: true,
         },
         email: {
-            type: 'VARCHAR(50)',
+            type: 'VARCHAR(100)',
             notNull: true,
         },
         password: {
+            type: 'TEXT',
+            notNull: true,
+        },
+        role: {
             type: 'VARCHAR(50)',
             notNull: true,
         },

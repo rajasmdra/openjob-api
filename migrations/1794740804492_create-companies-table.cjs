@@ -1,15 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable indent */
-/**
- * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
- */
 exports.shorthands = undefined;
 
-/**
- * @param pgm {import('node-pg-migrate').MigrationBuilder}
- * @param run {() => void | undefined}
- * @returns {Promise<void> | void}
- */
 exports.up = (pgm) => {
     pgm.createTable('companies', {
         id: {
@@ -17,11 +9,19 @@ exports.up = (pgm) => {
             primaryKey: true,
         },
         name: {
+            type: 'VARCHAR(100)',
+            notNull: true,
+        },
+        location: {
             type: 'TEXT',
             notNull: true,
         },
         description: {
             type: 'TEXT',
+            notNull: true,
+        },
+        owner_id: {
+            type: 'VARCHAR(50)',
             notNull: true,
         },
         created_at: {
@@ -33,13 +33,10 @@ exports.up = (pgm) => {
             notNull: true,
         },
     });
+
+    pgm.addConstraint('companies', 'fk_companies.owner_id_users.id', 'FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE');
 };
 
-/**
- * @param pgm {import('node-pg-migrate').MigrationBuilder}
- * @param run {() => void | undefined}
- * @returns {Promise<void> | void}
- */
 exports.down = (pgm) => {
     pgm.dropTable('companies');
 };

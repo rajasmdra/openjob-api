@@ -37,8 +37,8 @@ exports.up = (pgm) => {
             notNull: true,
         },
     });
-    pgm.addConstraint('applications', 'fk_collaborations.user_id_users.id', 'FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE');
-    pgm.addConstraint('applications', 'fk_collaborations.job_id_jobs.id', 'FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE');
+    pgm.addConstraint('applications', 'fk_applications.user_id_users.id', 'FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE');
+    pgm.addConstraint('applications', 'fk_applications.job_id_jobs.id', 'FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE');
 };
 
 /**

@@ -16,10 +16,6 @@ exports.up = (pgm) => {
             type: 'VARCHAR(50)',
             primaryKey: true,
         },
-        title: {
-            type: 'TEXT',
-            notNull: true,
-        },
         company_id: {
             type: 'VARCHAR(50)',
             notNull: true,
@@ -27,6 +23,48 @@ exports.up = (pgm) => {
         category_id: {
             type: 'VARCHAR(50)',
             notNull: true,
+        },
+        title: {
+            type: 'TEXT',
+            notNull: true,
+        },
+        description: {
+            type: 'TEXT',
+            notNull: true,
+        },
+        job_type: {
+            type: 'VARCHAR(50)',
+            notNull: true,
+        },
+        experience_level: {
+            type: 'VARCHAR(50)',
+            notNull: true,
+        },
+        location_type: {
+            type: 'VARCHAR(50)',
+            notNull: true,
+        },
+        location_city: {
+            type: 'VARCHAR(100)',
+            notNull: false,
+        },
+        salary_min: {
+            type: 'INTEGER',
+            notNull: false,
+        },
+        salary_max: {
+            type: 'INTEGER',
+            notNull: false,
+        },
+        is_salary_visible: {
+            type: 'BOOLEAN',
+            notNull: true,
+            default: true,
+        },
+        status: {
+            type: 'VARCHAR(50)',
+            notNull: true,
+            default: 'open',
         },
         created_at: {
             type: 'TEXT',
@@ -37,8 +75,9 @@ exports.up = (pgm) => {
             notNull: true,
         },
     });
-    pgm.addConstraint('jobs', 'fk_collaborations.company_id_companies.id', 'FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE CASCADE');
-    pgm.addConstraint('jobs', 'fk_collaborations.category_id_categories.id', 'FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE');
+
+    pgm.addConstraint('jobs', 'fk_jobs.company_id_companies.id', 'FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE CASCADE');
+    pgm.addConstraint('jobs', 'fk_jobs.category_id_categories.id', 'FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE');
 };
 
 /**
