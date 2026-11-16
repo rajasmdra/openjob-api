@@ -40,14 +40,13 @@ class BookmarkRepositories {
         return result.rows[0];
     }
 
-    async deleteBookmarkById(id) {
+    async deleteBookmarkByJobAndUser(jobId, userId) {
         const query = {
-            text: 'DELETE FROM bookmarks WHERE id = $1 RETURNING id',
-            values: [id],
+            text: 'DELETE FROM bookmarks WHERE job_id = $1 AND user_id = $2 RETURNING id',
+            values: [jobId, userId],
         };
 
         const result = await this.pool.query(query);
-
         if (!result.rowCount) {
             return null;
         }

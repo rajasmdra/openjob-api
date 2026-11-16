@@ -8,7 +8,7 @@ import NotFoundError from '../../exceptions/not-found-error.js';
 import InvariantError from '../../exceptions/invariant-error.js';
 
 export const createBookmarks = async (req, res, next) => {
-    const { job_id: jobId } = req.validated;
+    const { jobId } = req.params;
     const { id: userId } = req.user;
 
     const job = await JobRepositories.getJobById(jobId);
@@ -53,21 +53,14 @@ export const getBookmarkById = async (req, res, next) => {
     return response(res, 200, 'Detail bookmark berhasil diambil', bookmark);
 };
 
-export const deleteBookmarkById = async (req, res, next) => {
-    const { id } = req.params;
+export const deleteBookmarkByJobId = async (req, res, next) => {
+    const { jobId } = req.params;
     const { id: userId } = req.user;
 
-    const bookmark = await BookmarkRepositories.getBookmarkById(id);
-    if (!bookmark) {
-        return next(new NotFoundError('Gagal menghapus bookmark. ID tidak ditemukan'));
+    const deletedId = await BookmarkRepositories.deleteBookmarkByJobAndUser(jobId, userId);
+    if (!deletedId) {
+        return next(new NotFoundError('Gagal menghapus bookmark. Data tidak ditemukan'));
     }
-
-    const isOwner = await BookmarkRepositories.verifyBookmarkOwner(id, userId);
-    if (!isOwner) {
-        return next(new AuthorizationError('Anda tidak berhak mengakses resource ini'));
-    }
-
-    await BookmarkRepositories.deleteBookmarkById(id);
 
     return response(res, 200, 'Bookmark berhasil dihapus');
 };

@@ -33,19 +33,19 @@ export const getAllJobs = async (req, res) => {
     const { title, 'company-name': companyName, companyId, categoryId } = req.query;
 
     const jobs = await JobRepositories.getAllJobs({ title, companyName, companyId, categoryId });
-    return response(res, 200, 'Daftar lowongan pekerjaan berhasil diambil', jobs);
+    return response(res, 200, 'Daftar lowongan pekerjaan berhasil diambil', { jobs });
 };
 
 export const getJobsByCompanyId = async (req, res) => {
     const { companyId } = req.params;
     const jobs = await JobRepositories.getJobsByCompanyId(companyId);
-    return response(res, 200, 'Daftar lowongan berdasarkan perusahaan berhasil diambil', jobs);
+    return response(res, 200, 'Daftar lowongan berdasarkan perusahaan berhasil diambil', { jobs });
 };
 
 export const getJobsByCategoryId = async (req, res) => {
     const { categoryId } = req.params;
     const jobs = await JobRepositories.getJobsByCategoryId(categoryId);
-    return response(res, 200, 'Daftar lowongan berdasarkan kategori berhasil diambil', jobs);
+    return response(res, 200, 'Daftar lowongan berdasarkan kategori berhasil diambil', { jobs });
 };
 
 export const getJobById = async (req, res, next) => {

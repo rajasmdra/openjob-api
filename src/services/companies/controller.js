@@ -26,7 +26,7 @@ export const createCompany = async (req, res, next) => {
 
 export const getAllCompanies = async (req, res) => {
     const companies = await CompanyRepositories.getAllCompanies();
-    return response(res, 200, 'Perusahaan sukses ditampilkan', companies);
+    return response(res, 200, 'Perusahaan sukses ditampilkan', { companies });
 };
 
 export const getCompanyById = async (req, res, next) => {
@@ -42,8 +42,13 @@ export const getCompanyById = async (req, res, next) => {
 
 export const editCompanyById = async (req, res, next) => {
     const { id } = req.params;
+    const { name, location, description } = req.validated;
     const { id: owner } = req.user;
-    const { name, description, location } = req.validated;
+
+    const existingCompany = await CompanyRepositories.getCompanyById(id);
+    if (!existingCompany) {
+        return next(new NotFoundError('Gagal memperbarui perusahaan. ID tidak ditemukan'));
+    }
 
     const isOwner = await CompanyRepositories.verifyCompanyOwner(id, owner);
     if (!isOwner) {
@@ -56,9 +61,6 @@ export const editCompanyById = async (req, res, next) => {
         location,
         description,
     });
-    if (!company) {
-        return next(new NotFoundError('Perusahaan tidak ditemukan'));
-    }
 
     return response(res, 200, 'Perusahaan berhasil diperbarui', company);
 };
@@ -67,15 +69,17 @@ export const deleteCompanyById = async (req, res, next) => {
     const { id } = req.params;
     const { id: owner } = req.user;
 
+    const existingCompany = await CompanyRepositories.getCompanyById(id);
+    if (!existingCompany) {
+        return next(new NotFoundError('Gagal menghapus perusahaan. ID tidak ditemukan'));
+    }
+
     const isOwner = await CompanyRepositories.verifyCompanyOwner(id, owner);
     if (!isOwner) {
         return next(new AuthorizationError('Anda tidak berhak mengakses resource ini'));
     }
 
-    const deletedCompany = await CompanyRepositories.deleteCompanyById(id);
-    if (!deletedCompany) {
-        return next(new NotFoundError('Perusahaan tidak ditemukan'));
-    }
+    await CompanyRepositories.deleteCompanyById(id);
 
-    return response(res, 200, 'Perusahaan berhasil dihapus', deletedCompany);
+    return response(res, 200, 'Perusahaan berhasil dihapus');
 };

@@ -19,7 +19,7 @@ export const createCategory = async (req, res, next) => {
 
 export const getAllCategories = async (req, res) => {
     const categories = await CategoryRepositories.getAllCategories();
-    return response(res, 200, 'Daftar kategori berhasil diambil', categories);
+    return response(res, 200, 'Daftar kategori berhasil diambil', { categories });
 };
 
 export const getCategoryById = async (req, res, next) => {
