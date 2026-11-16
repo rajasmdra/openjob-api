@@ -1,6 +1,6 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable indent */
-import TokenManager from '../security/token-manajer.js';
+import TokenManager from '../security/token-manager.js';
 import response from '../utils/response.js';
 
 const authenticateToken = async (req, res, next) => {
