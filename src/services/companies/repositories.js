@@ -9,14 +9,14 @@ class CompanyRepositories {
         this.pool = new Pool();
     }
 
-    async createCompany({ name, description, owner }) {
+    async createCompany({ name, location, description, owner }) {
         const id = nanoid(16);
         const createdAt = new Date().toISOString();
         const updatedAt = createdAt;
 
         const query = {
-            text: 'INSERT INTO companies(id, name, description, created_at, updated_at, owner_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING id, name, description, created_at, updated_at, owner_id',
-            values: [id, name, description, createdAt, updatedAt, owner],
+            text: 'INSERT INTO companies(id, name, location, description, created_at, updated_at, owner_id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, location, description, created_at, updated_at, owner_id',
+            values: [id, name, location, description, createdAt, updatedAt, owner],
         };
 
         const result = await this.pool.query(query);
@@ -43,12 +43,12 @@ class CompanyRepositories {
         return result.rows[0];
     }
 
-    async editCompanyById({ id, name, description }) {
+    async editCompanyById({ id, name, location, description }) {
         const updatedAt = new Date().toISOString();
 
         const query = {
-            text: 'UPDATE companies SET name = $1, description = $2, updated_at = $3 WHERE id = $4 RETURNING id',
-            values: [name, description, updatedAt, id],
+            text: 'UPDATE companies SET name = $1, location = $2, description = $3, updated_at = $4 WHERE id = $5 RETURNING id',
+            values: [name, location, description, updatedAt, id],
         };
 
         const result = await this.pool.query(query);
