@@ -2,6 +2,6 @@
 /* eslint-disable indent */
 import Joi from 'joi';
 
-export const notePayloadSchema = Joi.object({
+export const CategoryPayloadSchema = Joi.object({
     name: Joi.string().required(),
 });

@@ -6,10 +6,10 @@ import { Pool } from "pg";
 
 class CategoryRepositories {
     constructor() {
-        this.pool = Pool();
+        this.pool = new Pool();
     }
 
-    async createCategories({ name }) {
+    async createCategory({ name }) {
         const id = nanoid(16);
         const createdAt = new Date().toISOString();
         const updatedAt = createdAt;

@@ -2,20 +2,17 @@
 /* eslint-disable indent */
 import CategoryRepositories from './repositories.js';
 import response from '../../utils/response.js';
-import AuthorizationError from '../../exceptions/authorization-error.js';
 import NotFoundError from '../../exceptions/not-found-error.js';
+import InvariantError from '../../exceptions/invariant-error.js';
 
 export const createCategory = async (req, res, next) => {
     const { name } = req.validated;
-    const { role } = req.user;
-
-    if (role !== 'admin') {
-        return next(new AuthorizationError('Anda tidak berhak menambahkan kategori'));
-    }
 
     const category = await CategoryRepositories.createCategory({
-        name
+        name,
     });
+
+    if (!category) return next(new InvariantError('Kategori gagal ditambahkan'));
 
     return response(res, 201, 'Kategori berhasil ditambahkan', category);
 };
@@ -39,16 +36,12 @@ export const getCategoryById = async (req, res, next) => {
 export const editCategoryById = async (req, res, next) => {
     const { id } = req.params;
     const { name } = req.validated;
-    const { role } = req.user;
-
-    if (role !== 'admin') {
-        return next(new AuthorizationError('Anda tidak berhak mengedit kategori'));
-    }
 
     const category = await CategoryRepositories.editCategoryById({
         id,
         name,
     });
+
     if (!category) {
         return next(new NotFoundError('Gagal memperbarui kategori. ID tidak ditemukan'));
     }
@@ -58,11 +51,6 @@ export const editCategoryById = async (req, res, next) => {
 
 export const deleteCategoryById = async (req, res, next) => {
     const { id } = req.params;
-    const { role } = req.user;
-
-    if (role !== 'admin') {
-        return next(new AuthorizationError('Anda tidak berhak menghapus kategori'));
-    }
 
     const deletedCategory = await CategoryRepositories.deleteCategoryById(id);
     if (!deletedCategory) {
