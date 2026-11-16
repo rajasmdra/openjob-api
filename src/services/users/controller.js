@@ -6,7 +6,7 @@ import response from '../../utils/response.js';
 import UserRepositories from './repositories.js';
 
 export const createUser = async (req, res, next) => {
-    const { name, email, password } = req.validated;
+    const { name, email, password, role } = req.validated;
 
     const isNewEmail = await UserRepositories.verifyNewEmail(email);
     if (!isNewEmail) {
@@ -17,6 +17,7 @@ export const createUser = async (req, res, next) => {
         name,
         email,
         password,
+        role,
     });
 
     if (!user) {
