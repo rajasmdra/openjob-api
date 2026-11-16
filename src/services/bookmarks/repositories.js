@@ -19,7 +19,6 @@ class BookmarkRepositories {
         };
 
         const result = await this.pool.query(query);
-
         return result.rows[0];
     }
 
@@ -28,7 +27,6 @@ class BookmarkRepositories {
             text: 'SELECT * FROM bookmarks WHERE user_id = $1',
             values: [userId],
         };
-
         const result = await this.pool.query(query);
         return result.rows;
     }
@@ -39,7 +37,6 @@ class BookmarkRepositories {
             values: [id],
         };
         const result = await this.pool.query(query);
-
         return result.rows[0];
     }
 
@@ -70,6 +67,16 @@ class BookmarkRepositories {
         }
 
         return result.rows[0].user_id === userId;
+    }
+
+    async verifyBookmarkExists(userId, jobId) {
+        const query = {
+            text: 'SELECT id FROM bookmarks WHERE user_id = $1 AND job_id = $2',
+            values: [userId, jobId],
+        };
+
+        const result = await this.pool.query(query);
+        return result.rowCount > 0;
     }
 }
 
