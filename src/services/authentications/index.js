@@ -2,6 +2,7 @@
 /* eslint-disable indent */
 import { Router } from 'express';
 import { login, logout, refreshToken } from './controller.js';
+import authenticateToken from '../../middlewares/auth.js';
 import validate from '../../middlewares/validate.js';
 import {
     deleteAuthenticationPayloadSchema,
@@ -11,7 +12,7 @@ import {
 
 const router = Router();
 
-router.post('/authentications', validate(postAuthenticationPayloadSchema), login);
+router.post('/authentications', authenticateToken, validate(postAuthenticationPayloadSchema), login);
 router.put('/authentications', validate(putAuthenticationPayloadSchema), refreshToken);
 router.delete('/authentications', validate(deleteAuthenticationPayloadSchema), logout);
 
