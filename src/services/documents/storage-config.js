@@ -5,7 +5,7 @@ import path from 'path';
 import multer from 'multer';
 import ClientError from '../../exceptions/client-error.js';
 
-export const UPLOAD_FOLDER = path.resolve(process.cwd(), 'src/services/documents/files');
+export const UPLOAD_FOLDER = path.resolve(process.cwd(), 'src/services/documents/files/documents');
 
 if (!fs.existsSync(UPLOAD_FOLDER)) {
     fs.mkdirSync(UPLOAD_FOLDER, { recursive: true });

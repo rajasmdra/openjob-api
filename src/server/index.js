@@ -7,7 +7,7 @@ import cors from 'cors';
 import ErrorHandler from '../middlewares/error.js';
 
 const app = express();
-app.use('/documents', express.static('src/services/documents/files'));
+app.use('/documents', express.static('src/services/documents/files/documents'));
 app.use(cors());
 app.use(express.json());
 app.use(routes);
