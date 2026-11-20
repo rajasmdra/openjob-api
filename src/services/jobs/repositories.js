@@ -47,7 +47,7 @@ class JobRepositories {
         return result.rows[0];
     }
 
-    async getAllJobs({ title, companyName, companyId, categoryId } = {}) {
+    async getAllJobs({ title, companyName, companyId, categoryName, categoryId } = {}) {
         const conditions = [];
         const values = [];
 
@@ -66,15 +66,25 @@ class JobRepositories {
             conditions.push(`jobs.company_id = $${values.length}`);
         }
 
+        if (categoryName) {
+            values.push(`%${categoryName}%`);
+            conditions.push(`categories.name ILIKE $${values.length}`);
+        }
+
         if (categoryId) {
             values.push(categoryId);
             conditions.push(`jobs.category_id = $${values.length}`);
         }
 
         let text = `
-            SELECT jobs.*, companies.name AS company_name 
-            FROM jobs 
-            INNER JOIN companies ON jobs.company_id = companies.id
+            SELECT 
+                jobs.id, jobs.company_id, companies.name AS company_name, jobs.category_id, 
+                categories.name AS category_name, jobs.title, jobs.description, jobs.job_type, 
+                jobs.experience_level, jobs.location_type, 
+                jobs.location_city, jobs.salary_min, jobs.salary_max
+            FROM jobs
+            LEFT JOIN companies ON jobs.company_id = companies.id
+            LEFT JOIN categories ON jobs.category_id = categories.id
         `;
 
         if (conditions.length > 0) {

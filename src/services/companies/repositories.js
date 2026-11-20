@@ -26,7 +26,7 @@ class CompanyRepositories {
 
     async getAllCompanies() {
         const query = {
-            text: 'SELECT * FROM companies',
+            text: 'SELECT id, name, location, description, created_at, updated_at FROM companies',
         };
 
         const result = await this.pool.query(query);

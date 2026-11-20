@@ -26,7 +26,17 @@ class ApplicationRepositories {
 
     async getAllApplications() {
         const query = {
-            text: 'SELECT * FROM applications',
+            text: `
+                SELECT 
+                    applications.id, applications.user_id, users.name AS applicant_name, 
+                    users.email AS applicant_email, applications.job_id, jobs.title AS job_title, 
+                    companies.name AS company_name, jobs.job_type, jobs.location_type, jobs.location_city, 
+                    applications.status, applications.created_at, applications.updated_at
+                FROM applications
+                JOIN jobs ON applications.job_id = jobs.id
+                JOIN companies ON jobs.company_id = companies.id
+                JOIN users ON applications.user_id = users.id;
+            `,
             values: [],
         };
 
