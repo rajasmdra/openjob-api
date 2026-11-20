@@ -8,6 +8,7 @@ import applications from '../services/applications/index.js';
 import bookmarks from '../services/bookmarks/index.js';
 import profiles from '../services/profiles/index.js';
 import authentications from '../services/authentications/index.js';
+import documents from '../services/documents/index.js';
 
 const routes = Router();
 
@@ -19,5 +20,6 @@ routes.use('/', applications);
 routes.use('/', bookmarks);
 routes.use('/', profiles);
 routes.use('/', authentications);
+routes.use('/', documents);
 
 export default routes;
