@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable no-unused-vars */
 /* eslint-disable indent */
 import response from '../utils/response.js';
 import { ClientError } from '../exceptions/index.js';
@@ -13,9 +14,14 @@ const ErrorHandler = (err, req, res, next) => {
     }
 
     const status = err.statusCode || err.status || 500;
-    const message = err.message || 'Internal Server Error';
+    const isProduction = process.env.NODE_ENV === 'production';
 
     console.error('Unhandled error:', err);
+
+    const message = (isProduction && status >= 500)
+        ? 'Internal Server Error'
+        : (err.message || 'Internal Server Error');
+
     return response(res, status, message, null);
 };
 
