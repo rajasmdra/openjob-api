@@ -1,7 +1,7 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable indent */
 import UserRepositories from '../users/repositories.js';
-import ApplicationRepositories from '../applications/repositories.js';
+import ProfileRepositories from './repositories.js';
 import BookmarkRepositories from '../bookmarks/repositories.js';
 import response from '../../utils/response.js';
 import NotFoundError from '../../exceptions/not-found-error.js';
@@ -20,7 +20,7 @@ export const getMyProfile = async (req, res, next) => {
 export const getMyApplications = async (req, res) => {
     const { id: userId } = req.user;
 
-    const applications = await ApplicationRepositories.getApplicationsByUser(userId);
+    const applications = await ProfileRepositories.getMyApplications(userId);
     return response(res, 200, 'Daftar lamaran saya berhasil diambil', { applications });
 };
 
