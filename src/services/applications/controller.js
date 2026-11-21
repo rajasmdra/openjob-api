@@ -1,4 +1,6 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable no-empty */
+/* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 /* eslint-disable indent */
 import ApplicationRepositories from './repositories.js';
@@ -7,6 +9,7 @@ import response from '../../utils/response.js';
 import AuthorizationError from '../../exceptions/authorization-error.js';
 import NotFoundError from '../../exceptions/not-found-error.js';
 import ProducerService from './service.js';
+import CacheService from '../../cache/redis-service.js';
 
 export const createApplication = async (req, res, next) => {
     const { job_id: jobId, status = 'pending' } = req.validated;
@@ -28,6 +31,9 @@ export const createApplication = async (req, res, next) => {
         status,
     });
 
+    await CacheService.delete(`applications:user:${userId}`);
+    await CacheService.delete(`applications:job:${jobId}`);
+
     const message = {
         application_id: application.id,
     };
@@ -45,6 +51,12 @@ export const getApplicationById = async (req, res, next) => {
     const { id } = req.params;
     const { id: userId } = req.user;
 
+    try {
+        const cachedData = await CacheService.get(`applications:${id}`);
+        res.setHeader('X-Data-Source', 'cache');
+        return response(res, 200, 'Detail lamaran berhasil diambil', JSON.parse(cachedData));
+    } catch (error) {}
+
     const application = await ApplicationRepositories.getApplicationById(id);
     if (!application) {
         return next(new NotFoundError('Lamaran tidak ditemukan'));
@@ -57,6 +69,8 @@ export const getApplicationById = async (req, res, next) => {
         return next(new AuthorizationError('Anda tidak berhak mengakses detail lamaran ini'));
     }
 
+    await CacheService.set(`applications:${id}`, JSON.stringify(application));
+    res.setHeader('X-Data-Source', 'database');
     return response(res, 200, 'Detail lamaran berhasil diambil', application);
 };
 
@@ -64,16 +78,22 @@ export const getApplicationsByUser = async (req, res, next) => {
     const { userId: targetUserId } = req.params;
     const { id: currentUserId } = req.user;
 
-    // Jika targetUserId adalah 'xxx' (invalid ID test di Postman), kembalikan array kosong
     if (targetUserId === 'xxx') {
         return response(res, 200, 'Daftar lamaran pengguna berhasil diambil', { applications: [] });
     }
-
     if (currentUserId !== targetUserId) {
         return next(new AuthorizationError('Anda tidak berhak melihat riwayat lamaran pengguna lain'));
     }
 
+    try {
+        const cachedData = await CacheService.get(`applications:user:${targetUserId}`);
+        res.setHeader('X-Data-Source', 'cache');
+        return response(res, 200, 'Daftar lamaran pengguna berhasil diambil', JSON.parse(cachedData));
+    } catch (error) {}
+
     const applications = await ApplicationRepositories.getApplicationsByUser(targetUserId);
+    await CacheService.set(`applications:user:${targetUserId}`, JSON.stringify({ applications }));
+    res.setHeader('X-Data-Source', 'database');
     return response(res, 200, 'Daftar lamaran pengguna berhasil diambil', { applications });
 };
 
@@ -83,16 +103,22 @@ export const getApplicationsByJob = async (req, res, next) => {
 
     const job = await JobRepositories.getJobById(jobId);
     if (!job) {
-        // Postman test 'Get Applications by Job Id with Invalid Id' mengharapkan 200 dengan array kosong
         return response(res, 200, 'Daftar pelamar untuk lowongan ini berhasil diambil', { applications: [] });
     }
-
     const isJobOwner = await JobRepositories.verifyJobOwner(jobId, userId);
     if (!isJobOwner) {
         return next(new AuthorizationError('Anda tidak berhak melihat daftar pelamar di lowongan ini'));
     }
 
+    try {
+        const cachedData = await CacheService.get(`applications:job:${jobId}`);
+        res.setHeader('X-Data-Source', 'cache');
+        return response(res, 200, 'Daftar lamaran pengguna berhasil diambil', JSON.parse(cachedData));
+    } catch (error) {}
+
     const applications = await ApplicationRepositories.getApplicationsByJob(jobId);
+    await CacheService.set(`applications:job:${jobId}`, JSON.stringify({ applications }));
+    res.setHeader('X-Data-Source', 'database');
     return response(res, 200, 'Daftar pelamar untuk lowongan ini berhasil diambil', { applications });
 };
 
@@ -105,13 +131,16 @@ export const editApplicationStatusById = async (req, res, next) => {
     if (!application) {
         return next(new NotFoundError('Lamaran tidak ditemukan'));
     }
-
     const isJobOwner = await ApplicationRepositories.verifyApplicationJobOwner(id, userId);
     if (!isJobOwner) {
         return next(new AuthorizationError('Anda tidak berhak mengubah status lamaran ini'));
     }
 
     const updatedApplication = await ApplicationRepositories.editApplicationStatusById({ id, status });
+    await CacheService.delete(`applications:${id}`);
+    await CacheService.delete(`applications:user:${application.user_id}`);
+    await CacheService.delete(`applications:job:${application.job_id}`);
+    res.setHeader('X-Data-Source', 'database');
     return response(res, 200, 'Status lamaran berhasil diperbarui', updatedApplication);
 };
 
@@ -130,5 +159,10 @@ export const deleteApplicationById = async (req, res, next) => {
     }
 
     await ApplicationRepositories.deleteApplicationById(id);
+
+    await CacheService.delete(`applications:${id}`);
+    await CacheService.delete(`applications:user:${userId}`);
+    await CacheService.delete(`applications:job:${application.job_id}`);
+
     return response(res, 200, 'Lamaran berhasil dibatalkan');
 };
