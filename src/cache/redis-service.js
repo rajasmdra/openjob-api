@@ -6,7 +6,7 @@ class CacheService {
     constructor() {
         this.client = createClient({
             socket: {
-                host: process.env.REDIS_SERVER,
+                host: process.env.REDIS_HOST,
             },
         });
 
