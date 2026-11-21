@@ -36,11 +36,28 @@ class UserRepositories {
 
     async getUserById(id) {
         const query = {
-            text: 'SELECT id, name, email, password, role, created_at, updated_at FROM users WHERE id = $1',
+            text: 'SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = $1',
             values: [id],
         };
 
         const result = await this.pool.query(query);
+        return result.rows[0];
+    }
+
+    async editUserById({ id, name, email }) {
+        const updatedAt = new Date().toISOString();
+
+        const query = {
+            text: 'UPDATE users SET name = $1, email = $2, updated_at = $3 WHERE id = $4 RETURNING id',
+            values: [name, email, updatedAt, id],
+        };
+
+        const result = await this.pool.query(query);
+
+        if (!result.rowCount) {
+            throw new Error('Gagal memperbarui profil pengguna. ID tidak ditemukan');
+        }
+
         return result.rows[0];
     }
 
