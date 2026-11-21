@@ -1,10 +1,12 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable camelcase */
 /* eslint-disable indent */
 import ApplicationRepositories from './repositories.js';
 import JobRepositories from '../jobs/repositories.js';
 import response from '../../utils/response.js';
 import AuthorizationError from '../../exceptions/authorization-error.js';
 import NotFoundError from '../../exceptions/not-found-error.js';
+import ProducerService from './service.js';
 
 export const createApplication = async (req, res, next) => {
     const { job_id: jobId, status = 'pending' } = req.validated;
@@ -15,11 +17,21 @@ export const createApplication = async (req, res, next) => {
         return next(new NotFoundError('Lowongan pekerjaan tidak ditemukan'));
     }
 
+    const isApplicationExist = await ApplicationRepositories.verifyApplicationExists(userId, jobId);
+    if (isApplicationExist) {
+        return response(res, 400, 'Anda sudah pernah melamar lowongan pekerjaan ini');
+    }
+
     const application = await ApplicationRepositories.createApplication({
         userId,
         jobId,
         status,
     });
+
+    const message = {
+        application_id: application.id,
+    };
+    await ProducerService.sendMessage('applications:new', JSON.stringify(message));
 
     return response(res, 201, 'Lamaran berhasil dikirim', application);
 };
